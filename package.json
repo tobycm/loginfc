@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "dev": "tsx watch index.ts",
+    "start": "tsx index.ts",
+    "genkey": "python3 new_secret.py",
+    "writekey": "tsx write_to_nfc.ts"
+  },
+  "dependencies": {
+    "nfc-pcsc": "^0.8.1",
+    "tsx": "^4.16.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.1.0"
+  }
+}

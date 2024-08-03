@@ -5,15 +5,16 @@ from secrets import token_bytes
 
 key = token_bytes(64)
 
+print(len(key))
+
 with open("secret.key", "wb") as key_file:
     key_file.write(key)
     print("Delete secret.key after written to card")
 
-hash = pbkdf2_hmac("sha512", key, b"smartcard",
-                   100000)  # dont really want a salt tbh
+hash = pbkdf2_hmac("sha512", key, b"", 100000)  # dont really want a salt tbh
 
-with open("secret.hash", "wb") as hash_file:
-    hash_file.write(hash)
+with open("secret.hash", "w") as hash_file:
+    hash_file.write(hash.hex())
     print("Hash written to secret.hash")
 
 print()
