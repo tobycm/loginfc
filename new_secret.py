@@ -11,7 +11,8 @@ with open("secret.key", "wb") as key_file:
     key_file.write(key)
     print("Delete secret.key after written to card")
 
-hash = pbkdf2_hmac("sha512", key, b"", 100000)  # dont really want a salt tbh
+hash = pbkdf2_hmac("sha512", key, b"smartcard",
+                   100000)  # dont really want a salt tbh
 
 with open("secret.hash", "w") as hash_file:
     hash_file.write(hash.hex())

@@ -1,25 +1,36 @@
-import { createHash } from "crypto";
+import { exec } from "child_process";
+import * as crypto from "crypto";
 import { readFile } from "fs/promises";
 import { NFC } from "nfc-pcsc";
 
 const nfc = new NFC();
 
+let authenticatedWith: string | undefined;
+
 nfc.on("reader", (reader) => {
-  // console.log(`${reader.name} device attached`);
-
   reader.on("card", async (card) => {
-    // console.log(`${reader.name} card detected`, card);
-
     try {
-      const hash = createHash("sha512")
-        .update(await reader.read(4, 16))
-        .digest("hex");
+      const hash = await new Promise(async (resolve, reject) => {
+        crypto.pbkdf2(await reader.read(4, 64), "smartcard", 100000, 64, "sha512", (err, key) => {
+          if (err) reject(err);
+          resolve(key.toString("hex"));
+        });
+      });
 
       try {
-        console.log(hash, await readFile("secret.hash", "utf8"));
         if (hash != (await readFile("secret.hash", "utf8"))) return;
 
-        console.log("Access granted");
+        console.log("Authenticated with", card.uid);
+
+        exec("loginctl show-session -p NCurrentInhibitors", (error, stdout) => {
+          if (error) return console.error(error);
+
+          if (!stdout.includes("NCurrentInhibitors=8")) return;
+
+          exec("loginctl unlock-session");
+        });
+
+        authenticatedWith = card.uid;
       } catch (error) {
         return;
       }
@@ -28,17 +39,15 @@ nfc.on("reader", (reader) => {
     }
   });
 
-  // reader.on("card.off", (card) => {
-  //   console.log(`${reader.name} card removed`, card);
-  // });
+  reader.on("card.off", (card) => {
+    console.log("Card", card.uid, "removed");
+    console.log("Locking session...");
 
-  // reader.on("error", (err) => {
-  //   console.log(`${reader.name} an error occurred`, err);
-  // });
-
-  // reader.on("end", () => {
-  //   console.log(`${reader.name} device removed`);
-  // });
+    if (authenticatedWith === card.uid) {
+      authenticatedWith = undefined;
+      exec("loginctl lock-session");
+    }
+  });
 });
 
 nfc.on("error", (err) => {

@@ -8,14 +8,20 @@ console.log("Waiting for NFC reader...");
 nfc.on("reader", (reader) => {
   console.log(`${reader.name} reader connected`);
 
+  const waitForCardTimeout = setTimeout(() => {
+    console.log("Waiting for card...");
+  }, 1000);
+
   reader.on("card", async (card) => {
+    clearTimeout(waitForCardTimeout);
+
     console.log(`${card.uid} card detected`);
 
     console.log("Writing secret key to card...");
 
     try {
       const buffer = Buffer.alloc(64);
-      buffer.write(await readFile("secret.key", "binary"));
+      buffer.write(await readFile("secret.key", "binary"), "binary");
 
       await reader.write(4, buffer);
 
