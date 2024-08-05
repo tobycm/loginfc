@@ -39,12 +39,21 @@ nfc.on("reader", (reader) => {
 
   reader.on("card.off", (card) => {
     console.debug("Card", card.uid, "removed");
-    console.debug("Locking session...");
+    console.debug("Locking session due to card removal...");
 
     if (authenticatedWith === card.uid) {
       authenticatedWith = undefined;
       exec("loginctl lock-session");
     }
+  });
+
+  reader.on("end", () => {
+    if (!authenticatedWith) return;
+
+    console.debug("Locking session due to reader disconnection...");
+    exec("loginctl lock-session");
+
+    authenticatedWith = undefined;
   });
 });
 
