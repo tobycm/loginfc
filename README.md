@@ -1,10 +1,11 @@
+[![loginfc banner](/loginfc.png)](https://github.com/tobycm/loginfc)
+
 # loginfc
 
 Login with NFC tags xddd
 
 Demo: https://www.youtube.com/watch?v=sH1NHUF4jtQ
 
-[![loginfc demo](https://img.youtube.com/vi/sH1NHUF4jtQ/0.jpg)](https://www.youtube.com/watch?v=sH1NHUF4jtQ)
 
 ## Installation
 
