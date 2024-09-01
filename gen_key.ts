@@ -1,5 +1,5 @@
-import * as crypto from "crypto";
-import { writeFile } from "fs/promises";
+import * as crypto from "node:crypto";
+import { writeFile } from "node:fs/promises";
 import { pbkdf2 } from "./crypto";
 
 // Generate a random key
@@ -9,8 +9,9 @@ const key = crypto.randomBytes(64);
 await writeFile("secret.key", key);
 
 // Write the hash to a file
-await writeFile("secret.hash", (await pbkdf2(key, "smartcard", 100000, 64, "sha512")).toString("hex"));
-console.log("Hash written to secret.hash");
+const hash = await pbkdf2(key, "smartcard", 100000, 64, "sha512");
+await writeFile("secret.hash", hash.toString("hex"));
+console.log("Hash:", hash.toString("hex"));
 
 console.log();
 console.log("Key and hash generated");
